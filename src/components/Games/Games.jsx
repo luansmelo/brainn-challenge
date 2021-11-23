@@ -42,6 +42,7 @@ const Games = () => {
       const tempConcursoId = concurso?.[0]?.concursoId;
       handleGetContestsById(tempConcursoId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game]);
 
   useEffect(() => {}, [content]);
