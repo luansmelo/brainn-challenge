@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const catchLotteries = async () => {
+export const fetchLotteries = async () => {
   try {
     const { data } = await axios.get(
       "https://brainn-api-loterias.herokuapp.com/api/v1/loterias"
@@ -11,7 +11,7 @@ export const catchLotteries = async () => {
   }
 };
 
-export const catchLotteriesContents = async () => {
+export const fetchLotteriesContents = async () => {
   try {
     const { data } = await axios.get(
       "https://brainn-api-loterias.herokuapp.com/api/v1/loterias-concursos"

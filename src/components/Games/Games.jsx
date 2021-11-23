@@ -6,77 +6,82 @@ import {
   Select,
   ContainerGame,
   ContaineTypeGame,
+  ContainerBalls,
+  ContainerLogo,
+  ContainerConcurso,
 } from ".";
+import { ChangeColors } from "../../services/Colors";
 import {
-  catchLotteries,
-  catchLotteriesContents,
+  fetchLotteries,
+  fetchLotteriesContents,
   contestsById,
 } from "../../services/RequestApi";
 
 const Games = () => {
   const [lottery, setLoterry] = useState([]);
   const [contents, setContents] = useState([]);
-  const [contentId, setContentId] = useState([]);
-  const [game, setGame] = useState("");
-  const [color, setColor] = useState("");
-  const [name, setName] = useState("");
-
-  const colors = {
-    "mega-sena": "#6BEFA3",
-    quina: "#8666EF",
-    lotofácil: "#DD7AC6",
-    lotomania: "#FFAB64",
-    timemania: "#5AAD7D",
-    "dia de sorte": "#BFAF83",
-  };
+  const [content, setContent] = useState({
+    data: null,
+    id: 0,
+    numeros: [],
+  });
+  const [game, setGame] = useState(null);
+  const [color, setColor] = useState(0);
+  const [name, setName] = useState("tente a sorte");
 
   useEffect(() => {
     handleGetLotteries();
     handleGetLotteriesContents();
-    handleGetContestsById();
   }, [color]);
 
+  useEffect(() => {
+    const concurso = contents?.filter(
+      (value) => value.loteriaId === Number(game)
+    );
+    if (concurso) {
+      const tempConcursoId = concurso?.[0]?.concursoId;
+      handleGetContestsById(tempConcursoId);
+    }
+  }, [game]);
+
+  useEffect(() => {}, [content]);
+
   const handleChange = (e) => {
-    setColor(colors[e.target.value]);
+    setColor(ChangeColors[e.target.value]);
     setGame(e.target.value);
 
-    for (let i = 0; i < lottery.length; i++) {
-      if (e.target.value === lottery[i].nome) {
-        setName(lottery[i].nome);
-      }
-    }
+    const games = lottery.filter((v) => v.id === Number(e.target.value));
+    setName(games[0].nome);
   };
 
   const handleGetLotteries = async () => {
-    const response = await catchLotteries();
+    const response = await fetchLotteries();
     setLoterry(response);
   };
+
   const handleGetLotteriesContents = async () => {
-    const response = await catchLotteriesContents();
+    const response = await fetchLotteriesContents();
     setContents(response);
   };
 
   const handleGetContestsById = async (id) => {
     const response = await contestsById(id);
-    setContentId(response);
+    setContent(response);
   };
 
-  // const mapGetId = contents?.filter((item) => {
-
-  // });
-  // console.log(mapGetId);
+  const data = content?.data ? new Date(content?.data) : new Date();
+  const formatData = data?.toLocaleDateString("pt-BR", { timeZone: "UTC" });
 
   return (
-    <Container>
-      <div style={{ position: "relative" }}>
+    <Container style={{ position: "relative" }}>
+      <div style={{ position: "absolute", left: 0 }}>
         <svg
-          width="575px"
-          height="100%"
-          viewBox="0 0 700 800"
-          fill="none"
+          width="600px"
+          viewBox="0 0 745 815"
+          fill="blue"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path d="M630 0C630 0 460.26 401.011 630 800H0V0H690Z" fill={color} />
+          <path d="M630 0C630 0 440.26 401.011 630 812H0V0H690Z" fill={color} />
         </svg>
       </div>
       <ChildContainer>
@@ -85,7 +90,7 @@ const Games = () => {
             <option hidden>escolha um jogo</option>
             {lottery.map(({ id, nome }) => {
               return (
-                <option key={id} id={id} value={nome}>
+                <option key={id} id={id} value={id}>
                   {nome}
                 </option>
               );
@@ -93,14 +98,39 @@ const Games = () => {
           </Select>
         }
         <ContaineTypeGame>
-          <div>
+          <ContainerLogo>
             <img src="logo.svg" alt="" />
             <h1>{name}</h1>
-          </div>
+          </ContainerLogo>
         </ContaineTypeGame>
+
+        <ContainerConcurso>
+          <h3>
+            {content?.id ? (
+              <div>
+                <p>CONCURSO</p>
+                {content?.id} - {formatData}{" "}
+              </div>
+            ) : null}
+          </h3>
+        </ContainerConcurso>
       </ChildContainer>
 
-      <ContainerGame></ContainerGame>
+      <ContainerGame>
+        <ContainerBalls>
+          <ul>
+            {content?.numeros.map((numero) => (
+              <li key={numero}>{numero}</li>
+            ))}
+          </ul>
+        </ContainerBalls>
+        <div>
+          <p>
+            Este sorteio é meramente ilustrativo e não possui nenhuma ligação
+            com a CAIXA.
+          </p>
+        </div>
+      </ContainerGame>
     </Container>
   );
 };
